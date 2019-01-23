@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.colorchooser import askcolor
 from PIL import Image, ImageDraw
+import datetime
 
 
 class Paint(Frame):
@@ -48,7 +49,7 @@ class Paint(Frame):
         self.eraser_button = Button(tools_frame, text='\u232B', command=self.use_eraser, height=1, width=1)
         self.eraser_button.pack(side="left", padx=0, pady=5)
 
-        self.choose_size_button = Scale(tools_frame, from_=1, to=20, orient=HORIZONTAL, command=self.size)
+        self.choose_size_button = Scale(tools_frame, from_=1, to=50, orient=HORIZONTAL, command=self.size)
         self.choose_size_button.pack(side="left", padx=5, pady=5)
 
         # save button
@@ -64,6 +65,14 @@ class Paint(Frame):
 
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.reset)
+        self.canvas.bind('<Motion>', self.set_position)
+
+        # cursor position
+        footer_frame = Frame(self)
+        footer_frame.pack(fill='both')
+
+        self.position_label = Label(footer_frame, text='x = 0  y = 0')
+        self.position_label.pack(side='right')
 
         # PIL image variable
         self.image = Image.new('RGB', (600, 600), 'white')
@@ -92,7 +101,7 @@ class Paint(Frame):
 
     def choose_color2(self):
         self.eraser_on = False
-        self.color2 = askcolor(color=self.color1)[1]
+        self.color2 = askcolor(color=self.color2)[1]
         self.set_color2_button(None)
 
     def use_brush(self):
@@ -127,18 +136,21 @@ class Paint(Frame):
         self.old_x = event.x
         self.old_y = event.y
 
+    def set_position(self, event):
+        self.position_label['text'] = 'x = {}  y = {}'.format(event.x, event.y)
+
     def create_rectangle(self, event):
         if self.shape_x and self.shape_y:
             pass
+
+    def size(self, size):
+        self.line_width = int(size)
 
     def reset(self, event):
         self.old_x, self.old_y = None, None
 
     def save(self):
-        self.image.save("image.png")
-
-    def size(self, size):
-        self.line_width = int(size)
+        self.image.save("image{}.png".format(datetime.datetime.now().strftime("%Y%m%d%H%M%S")))
 
 
 if __name__ == '__main__':
